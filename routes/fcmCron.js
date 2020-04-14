@@ -9,14 +9,14 @@ router.post("/", function(req, res, next) {
     const { action } = req.body
 
     if(action === "start"){
-        task = cron.schedule("* * * * *", () => {
-          console.log(`one minute passed, notification sended`);
-          fcmCronLatestPost();
-        });
-        // task = cron.schedule("0 */4 * * *", () => {
-        //   console.log(`four hours passed, notification sended`);
+        // task = cron.schedule("* * * * *", () => {
+        //   console.log(`one minute passed, notification sended`);
         //   fcmCronLatestPost();
         // });
+        task = cron.schedule("0 */4 * * *", () => {
+          console.log(`four hours passed, notification sended`);
+          fcmCronLatestPost();
+        });
 
         res.send("cron start!");
     }
