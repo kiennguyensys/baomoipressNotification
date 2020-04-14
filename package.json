@@ -2,9 +2,11 @@
   "name": "baomoipressV2FCM",
   "version": "1.0.0",
   "private": true,
+  "proxy": "http://localhost:5000/",
+  "main": "./bin/www",
   "scripts": {
     "start": "node -r esm ./bin/www",
-    "heroku-postbuild": "cd client/ && npm install && npm run build"
+    "heroku-postbuild": "cd client && npm install && npm install --only=dev --no-shrinkwrap && npm run build"
   },
   "dependencies": {
     "cookie-parser": "^1.4.5",
