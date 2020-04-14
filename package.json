@@ -1,0 +1,23 @@
+{
+  "name": "baomoipressV2FCM",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node -r esm ./bin/www",
+    "heroku-postbuild": "cd client && yarn install && yarn build"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.5",
+    "cors": "^2.8.5",
+    "debug": "^4.1.1",
+    "esm": "^3.2.25",
+    "express": "^4.17.1",
+    "fcm-node": "^1.5.2",
+    "http-errors": "^1.7.3",
+    "jade": "^1.11.0",
+    "morgan": "^1.10.0",
+    "netlify-lambda": "^1.6.3",
+    "node-cron": "^2.0.3",
+    "node-fetch": "^2.6.0"
+  }
+}
