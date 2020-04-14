@@ -22,7 +22,7 @@ export const fcmCronLatestPost = async () => {
 
 export const sendNotif = async (data, tokens, topics) => {
     const message = {
-        to: topics.length ? ('/topics/' + topics) : tokens,
+        to: (topics && topics.length) ? ('/topics/' + topics) : tokens,
         collapse_key: 'collapse_key',
 
         notification: {

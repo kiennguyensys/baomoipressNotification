@@ -114,6 +114,7 @@ const NotificationCenter = () => {
     }
 
     const sendNotifsToServer = (tokens, topics) => {
+        console.log(title)
         axios.post("/fcm-sender", {
             title: title,
             body: body,
