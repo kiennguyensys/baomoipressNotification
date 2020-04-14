@@ -1,10 +1,10 @@
 {
   "name": "baomoipressV2FCM",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "start": "node -r esm ./bin/www",
-    "heroku-postbuild": "cd client && npm install && npm run build"
+    "heroku-postbuild": "cd client/ && npm install && npm run build"
   },
   "dependencies": {
     "cookie-parser": "^1.4.5",
