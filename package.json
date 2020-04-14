@@ -5,8 +5,7 @@
   "proxy": "http://localhost:5000/",
   "main": "./bin/www",
   "scripts": {
-    "start": "node -r esm ./bin/www",
-    "heroku-postbuild": "npm run start"
+    "start": "node -r esm ./bin/www"
   },
   "dependencies": {
     "cookie-parser": "^1.4.5",
