@@ -24,9 +24,10 @@ export const sendNotif = async (data, tokens, topics) => {
     const message = {
         to: (topics && topics.length) ? ('/topics/' + topics) : tokens,
         collapse_key: 'Hot News',
-        priority: "high",
-        mutable_content: JSON.stringify(true),
-
+        priority: 'high',
+        mutable_content: true,
+        content_available: true,
+        category: 'fcm',
         notification: {
             title: data.title,
             body: data.body,

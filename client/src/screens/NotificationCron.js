@@ -3,15 +3,20 @@ import { Button } from "react-bootstrap";
 import axios from 'axios';
 
 const NotificationCron = ({history}) => {
+  const [isCheckingCurrentTask, setCheckingCurrentTask] = useState(false)
   const [isTaskRunning, setTaskRunning] = useState(false)
   const [isServerError, setServerError] = useState(false)
 
   const checkCronjob = () => {
+      setCheckingCurrentTask(true)
+
       axios.post('/fcm-cron', {
           action: "checkRunningTask"
       })
       .then(res => {
           const message = res.data
+          setCheckingCurrentTask(false)
+
           if(message === "scheduled") {
               setTaskRunning(true)
           }
@@ -79,6 +84,8 @@ const NotificationCron = ({history}) => {
               STOP
             </Button>
             }
+
+            {isCheckingCurrentTask && <p>Checking if task is running...</p>}
         </div>
         }
 

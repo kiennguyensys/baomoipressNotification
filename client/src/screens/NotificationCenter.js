@@ -6,7 +6,8 @@ import {
     Row,
     Col,
     Button,
-    ProgressBar
+    ProgressBar,
+    Spinner
 } from 'react-bootstrap';
 import axios from 'axios';
 import { apiUrl } from '../constants/api';
@@ -23,6 +24,7 @@ const NotificationCenter = () => {
     const [hobby, setHobby] = useState()
     const [ageRange, setAgeRange] = useState()
     const [validRecipientsNumber, setValidRecipientsNumber] = useState(0)
+    const [isCheckingValidRecipients, setCheckingValidRecipients] = useState(false)
     const [filterQuery, setFilterQuery] = useState()
     const [sendingProgress, setSendingProgress] = useState(0)
 
@@ -33,6 +35,7 @@ const NotificationCenter = () => {
             firstUpdate.current = false;
             return;
         }
+        setCheckingValidRecipients(true)
         checkValidRecipients()
     }, [hobby, gender, ageRange]);
 
@@ -69,6 +72,7 @@ const NotificationCenter = () => {
         axios.get(generalQuery + genderQuery + hobbyQuery + ageRangeQuery)
         .then(res => {
             setValidRecipientsNumber(res.headers["x-wp-total"])
+            setCheckingValidRecipients(false)
         })
         .catch(err => {
             console.log(err)
@@ -273,7 +277,11 @@ const NotificationCenter = () => {
                     <div
                         style={{ marginLeft: 10 }}
                     >
-                        <h6> {validRecipientsNumber} valid users </h6>
+                        <div className="d-flex flex-row align-items-center">
+                            <h6> {validRecipientsNumber} valid users </h6>
+                            {isCheckingValidRecipients && <Spinner animation="grow" /> }
+                        </div>
+
                         <p>
                             {hobby && <em> có sở thích: {hobby} <br/></em> }
 
