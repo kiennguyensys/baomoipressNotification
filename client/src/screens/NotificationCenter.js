@@ -256,7 +256,7 @@ const NotificationCenter = () => {
                           <Dropdown.Item eventKey="0-25">0-25</Dropdown.Item>
                           <Dropdown.Item eventKey="25-40">25-40</Dropdown.Item>
                           <Dropdown.Item eventKey="40-55">40-55</Dropdown.Item>
-                          <Dropdown.Item eventKey="55-99">>55-99</Dropdown.Item>
+                          <Dropdown.Item eventKey="55-99">55-99</Dropdown.Item>
                         </DropdownButton>
 
                         <Button variant="primary"

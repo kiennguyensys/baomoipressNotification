@@ -23,7 +23,9 @@ export const fcmCronLatestPost = async () => {
 export const sendNotif = async (data, tokens, topics) => {
     const message = {
         to: (topics && topics.length) ? ('/topics/' + topics) : tokens,
-        collapse_key: 'collapse_key',
+        collapse_key: 'Hot News',
+        priority: "high",
+        mutable_content: JSON.stringify(true),
 
         notification: {
             title: data.title,
