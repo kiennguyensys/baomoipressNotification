@@ -38,6 +38,9 @@ export const sendNotif = async (data, tokens, topics) => {
             title: data.title,
             body: data.body,
             slug: data.slug || "",
+            att: {
+                image_url: data.image || ""
+            }
         }
     };
 
