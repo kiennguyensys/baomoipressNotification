@@ -7,12 +7,17 @@ import {
     Col,
     Button,
     ProgressBar,
-    Spinner
+    Spinner,
+    Modal
 } from 'react-bootstrap';
 import axios from 'axios';
 import { apiUrl } from '../constants/api';
+import DateTimePicker from 'react-datetime-picker';
+import CronBuilder from 'react-cron-builder';
+import 'react-cron-builder/dist/bundle.css';
 
-const NotificationCenter = () => {
+
+const NotificationCenter = ({history}) => {
     const [title, setTitle] = useState()
     const [body, setBody] = useState()
     const [imageURL, setImageURL] = useState()
@@ -27,6 +32,12 @@ const NotificationCenter = () => {
     const [isCheckingValidRecipients, setCheckingValidRecipients] = useState(false)
     const [filterQuery, setFilterQuery] = useState()
     const [sendingProgress, setSendingProgress] = useState(0)
+
+    const [scheduleOption, setScheduleOption] = useState()
+    const [scheduleDateTime, setScheduleDateTime] = useState(new Date())
+    const [scheduleRecurringExpression, setScheduleRecurringExpression] = useState('* * * * * * *')
+    const [modalShow, setModalShow] = useState(false)
+
 
     const firstUpdate = useRef(true);
 
@@ -79,13 +90,12 @@ const NotificationCenter = () => {
         })
     }
 
-    const onSendSingleRecipient = (e) => {
-        e.preventDefault()
-        sendNotifsToServer([singleFCMToken])
+    const onSendSingleRecipient = () => {
+        sendScheduleNotifsToServer([singleFCMToken])
+        setSendingProgress(100)
     }
 
-    const onSendFilterRecipients = async(e) => {
-        e.preventDefault()
+    const onSendFilterRecipients = async() => {
 
         if(validRecipientsNumber){
             for (var batchNumber = 0; batchNumber <= validRecipientsNumber/1000 ; batchNumber++) {
@@ -106,19 +116,17 @@ const NotificationCenter = () => {
                     })
                     setSendingProgress((batchNumber + 1) / (validRecipientsNumber/1000 + 1) * 100)
 
-                    sendNotifsToServer(fcmTokensBatch)
+                    sendScheduleNotifsToServer(fcmTokensBatch)
                 });
             }
         }
     }
 
-    const onSendAllRecipients = (e) => {
-        e.preventDefault()
-        sendNotifsToServer([], "news")
+    const onSendAllRecipients = () => {
+        sendScheduleNotifsToServer([], "news")
     }
 
     const sendNotifsToServer = (tokens, topics) => {
-        console.log(title)
         axios.post("/fcm-sender", {
             title: title,
             body: body,
@@ -131,11 +139,70 @@ const NotificationCenter = () => {
             .catch(err => console.log(err))
     }
 
+    const sendScheduleNotifsToServer = (tokens, topics) => {
+        const scheduleData = { dateTime: scheduleDateTime, recurringExpression: scheduleRecurringExpression }
+
+        axios.post("/fcm-schedule-sender", {
+            data : {
+                title: title,
+                body: body,
+                slug: slugData || "",
+                image: imageURL || "",
+                tokens: tokens.toString(),
+                topics: topics || "",
+                scheduleAction: scheduleOption,
+                scheduleData: scheduleData
+            }
+        })
+            .then(res => console.log(res))
+            .catch(err => console.log(err))
+    }
+
+
+    const onChangeScheduleRadio = (e) => {
+        setScheduleOption(e.target.id)
+        if(e.target.id === 'recurring') setModalShow(true)
+    }
+
+    const onChangeScheduleDateTime = (newDate) => {
+        setScheduleDateTime(newDate)
+    }
+
+    const onChangeScheduleRecurringExpression = (value) => {
+        setScheduleRecurringExpression(value)
+    }
+
+    const onPressSendButton = () => {
+        if(recipientOption === 'singleRecipient') {
+            onSendSingleRecipient()
+        }
+
+        if(recipientOption === 'filterRecipients') {
+            onSendFilterRecipients()
+        }
+
+        if(recipientOption === 'allRecipients') {
+            onSendAllRecipients()
+            setSendingProgress(100)
+        }
+    }
+
+    const onNavigateScheduleHistory = () => {
+        history.push('/schedule-history')
+    }
+
+
     return(
         <div
           style={{ height: "100vh", marginTop: 10 }}
           className="d-flex flex-row justify-content-center align-items-center"
         >
+            <div
+                style={{ position: 'absolute', top: 20, right: 20 }}
+            >
+                <Button variant="link" onClick={onNavigateScheduleHistory}>Lịch sử kế hoạch >></Button>
+            </div>
+
             <div
                 style={{ height: 350, width: 320, marginRight: 20, borderStyle:"ridge" ,borderWidth: 1, borderRadius: 10, padding: 20, overflow: 'scroll' }}
             >
@@ -179,7 +246,7 @@ const NotificationCenter = () => {
                 <fieldset>
                   <Form.Group as={Row}>
                     <Form.Label as="legend" column sm={2}>
-                      Gửi theo
+                      Gửi cho
                     </Form.Label>
                     <Col sm={10}>
                       <Form.Check
@@ -217,9 +284,6 @@ const NotificationCenter = () => {
                             <Form.Control type="text" placeholder="FCM Token" onChange={e => setSingleFCMToken(e.target.value)} />
                           </Col>
                         </Form.Group>
-                        <Button variant="primary" type="submit">
-                            Send!
-                         </Button>
                     </Form>
                 }
 
@@ -263,16 +327,6 @@ const NotificationCenter = () => {
                           <Dropdown.Item eventKey="55-99">55-99</Dropdown.Item>
                         </DropdownButton>
 
-                        <Button variant="primary"
-                            onClick={e => {
-                                setHobby(null)
-                                setGender(null)
-                                setAgeRange(null)
-                                setSendingProgress(0)
-                            }}
-                        >
-                            Huỷ lọc
-                        </Button>
                     </div>
                     <div
                         style={{ marginLeft: 10 }}
@@ -288,23 +342,105 @@ const NotificationCenter = () => {
                             {gender && <em> có giới tính: {gender} <br/></em> }
                             {ageRange && <em> có độ tuổi: {ageRange} </em> }
                         </p>
-                        <ProgressBar now={sendingProgress} />
 
-                        {!sendingProgress &&
-                        <Button variant="primary" onClick={onSendFilterRecipients} style={{ marginTop: 10 }}>
-                            Send!
+                        <Button variant="primary"
+                            onClick={e => {
+                                setHobby(null)
+                                setGender(null)
+                                setAgeRange(null)
+                                setSendingProgress(0)
+                            }}
+                        >
+                            Huỷ lọc
                         </Button>
-                        }
+
                     </div>
                 </div>
                 }
 
-                {recipientOption === 'allRecipients' &&
-                    <Button variant="primary" onClick={onSendAllRecipients}>
-                        Send all!
-                    </Button>
-                }
             </div>
+
+            <div
+                style={{ height: 350, width: 320, marginLeft: 20, borderStyle:"ridge" ,borderWidth: 1, borderRadius: 10, padding: 20, overflow: 'scroll' }}
+            >
+                <fieldset>
+                  <Form.Group as={Row}>
+                    <Form.Label as="legend" column sm={2}>
+                      Kế hoạch
+                    </Form.Label>
+                    <Col sm={10}>
+                      <Form.Check
+                        type="radio"
+                        label="Now"
+                        name="scheduleOption"
+                        id="now"
+                        onChange={onChangeScheduleRadio}
+                      />
+                      <Form.Check
+                        type="radio"
+                        label="Scheduled"
+                        name="scheduleOption"
+                        id="scheduled"
+                        onChange={onChangeScheduleRadio}
+                      />
+                      <Form.Check
+                        type="radio"
+                        label="Recurring"
+                        name="scheduleOption"
+                        id="recurring"
+                        onChange={onChangeScheduleRadio}
+                      />
+                    </Col>
+                  </Form.Group>
+                </fieldset>
+
+                {scheduleOption === 'scheduled' &&
+                <div
+                 style={{ marginBottom: 20 }}
+                 >
+                    <DateTimePicker
+                      onChange={onChangeScheduleDateTime}
+                      value={scheduleDateTime}
+                    />
+                </div>
+                }
+
+                <Modal
+                  show={modalShow}
+                  onHide={() => setModalShow(false)}
+                  size="lg"
+                  aria-labelledby="example-custom-modal-styling-title"
+                >
+                  <Modal.Header closeButton>
+                    <Modal.Title id="example-custom-modal-styling-title">
+                      Recurring Builder Modal
+                    </Modal.Title>
+                  </Modal.Header>
+                  <Modal.Body>
+                    <CronBuilder
+                        cronExpression={scheduleRecurringExpression}
+                        onChange={onChangeScheduleRecurringExpression}
+                        showResult={true}
+                    />
+                  </Modal.Body>
+                </Modal>
+                {scheduleOption === 'recurring' &&
+                <p>
+                    {scheduleRecurringExpression}
+                </p>
+                }
+
+                <ProgressBar now={sendingProgress} />
+                {(!sendingProgress || recipientOption !== 'filterRecipients') &&
+                <Button variant="primary" onClick={onPressSendButton} style={{ marginTop: 10 }}>
+                    Send!
+                </Button>
+                }
+
+            </div>
+
+
+
         </div>
     )
 }

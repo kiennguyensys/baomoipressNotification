@@ -61,6 +61,7 @@ const NotificationCron = ({history}) => {
       <div style={{ width: 300 }}>
         <h1 className="text-center"> {`Cron Center`} </h1>
         <h6 className="text-center"> {`Cron latest post every 4 hours`} </h6>
+
         {!isServerError &&
         <div>
             {!isTaskRunning &&

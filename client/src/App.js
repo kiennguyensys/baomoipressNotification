@@ -6,6 +6,7 @@ import SignIn from './screens/SignIn';
 import Panel from './screens/Panel';
 import NotificationCenter from './screens/NotificationCenter';
 import NotificationCron from './screens/NotificationCron';
+import ScheduleHistory from './screens/ScheduleHistory';
 import PrivateRoute from './components/PrivateRoute';
 
 class App extends Component {
@@ -15,6 +16,7 @@ class App extends Component {
                 <Switch>
                   <Route path="/sign-in" component={SignIn} />
                   <PrivateRoute path="/notification-cron" component={NotificationCron} />
+                  <PrivateRoute path="/schedule-history" component={ScheduleHistory} />
                   <PrivateRoute path="/notification-sender" component={NotificationCenter} />
                   <PrivateRoute path="/" component={Panel} />
                 </Switch>

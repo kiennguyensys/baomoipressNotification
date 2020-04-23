@@ -27,7 +27,7 @@ export const sendNotif = async (data, tokens, topics) => {
         priority: 'high',
         mutable_content: true,
         content_available: true,
-        category: 'fcm',
+
         notification: {
             title: data.title,
             body: data.body,
@@ -38,9 +38,7 @@ export const sendNotif = async (data, tokens, topics) => {
             title: data.title,
             body: data.body,
             slug: data.slug || "",
-            att: {
-                image_url: data.image || ""
-            }
+            image_url: data.image || "",
         }
     };
 

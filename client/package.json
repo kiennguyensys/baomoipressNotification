@@ -5,8 +5,11 @@
   "dependencies": {
     "axios": "^0.19.2",
     "bootstrap": "^4.4.1",
+    "cronstrue": "^1.93.0",
     "react": "^16.13.1",
     "react-bootstrap": "^1.0.0",
+    "react-cron-builder": "^1.0.4",
+    "react-datetime-picker": "^3.0.1",
     "react-dom": "^16.13.1",
     "react-router-dom": "^5.1.2",
     "react-scripts": "^3.4.1"
