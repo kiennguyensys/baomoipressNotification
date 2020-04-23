@@ -49,11 +49,12 @@ const ScheduleHistory = ({history}) => {
 
             <ListGroup variant="flush">
                 {scheduledPlans.map((plan, idx) => {
-                    const dateTime = plan.scheduleData.dateTime
+                    let dateTime = plan.scheduleData.dateTime
                     const cronExpression = plan.scheduleData.recurringExpression
                     let formattedDT, formattedCron;
 
                     if(dateTime)
+                        dateTime = new Date(dateTime)
                         formattedDT = dateTime.getFullYear() + "-" + (dateTime.getMonth() + 1) + "-" + dateTime.getDate() + " " + dateTime.getHours() + ":" + dateTime.getMinutes() + ":" + dateTime.getSeconds()
 
                     if(cronExpression)
