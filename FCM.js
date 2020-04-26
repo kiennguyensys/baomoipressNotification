@@ -23,7 +23,7 @@ export const fcmCronLatestPost = async () => {
 
         let data = { title, body, image, slug }
         const latestPostID = localStorage.getItem('latestCronPostID');
-        if(!latestPostID || (parseInt(latestPostID) !== json.id)) {
+        if(!latestPostID || (parseInt(latestPostID) !== json[0].id)) {
             sendNotif(data, [], 'news')
             localStorage.setItem('latestCronPostID', json[0].id.toString());
         }
