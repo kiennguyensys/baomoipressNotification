@@ -5,6 +5,12 @@ import FCM from "fcm-node";
 const serverKey = 'AAAArKz-al0:APA91bEID_mgM9dN6WfcLrvbJjSe88uPEfCz6O1HlNIathDTxXVcsZzQJL8FOmDpZJoPMIS2VdcMKXMCmJyc8ONKLLxCOp3Shsr-5Nrg4mr4aJIZ2D22ACl_5_VbqcfnfpgsFtpd7oG_'
 
 const fcm = new FCM(serverKey);
+let localStorage;
+
+if (typeof localStorage === "undefined" || localStorage === null) {
+  var LocalStorage = require('node-localstorage').LocalStorage;
+  localStorage = new LocalStorage('./ServerLocalStorage');
+}
 
 export const fcmCronLatestPost = async () => {
   fetch("https://app.baomoi.press/wp-json/wp/v2/posts?per_page=1")
@@ -16,7 +22,11 @@ export const fcmCronLatestPost = async () => {
         let slug = json[0].slug
 
         let data = { title, body, image, slug }
-        sendNotif(data, [], 'news')
+        const latestPostID = localStorage.getItem('latestCronPostID');
+        if(!latestPostID || (parseInt(latestPostID) !== json.id)) {
+            sendNotif(data, [], 'news')
+            localStorage.setItem('latestCronPostID', json[0].id.toString());
+        }
     });
 };
 

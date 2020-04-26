@@ -14,7 +14,6 @@ router.post("/", function(req, res, next) {
         //   fcmCronLatestPost();
         // });
         task = cron.schedule("0 */4 * * *", () => {
-          console.log(`four hours passed, notification sended`);
           fcmCronLatestPost();
         });
 

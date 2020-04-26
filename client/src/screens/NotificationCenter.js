@@ -26,6 +26,7 @@ const NotificationCenter = ({history}) => {
     const [recipientOption, setRecipientOption] = useState()
     const [singleFCMToken, setSingleFCMToken] = useState()
     const [gender, setGender] = useState()
+    const [allHobbyChoices, setAllHobbyChoices] = useState([])
     const [hobby, setHobby] = useState()
     const [ageRange, setAgeRange] = useState()
     const [validRecipientsNumber, setValidRecipientsNumber] = useState(0)
@@ -41,6 +42,10 @@ const NotificationCenter = ({history}) => {
 
     const firstUpdate = useRef(true);
 
+    useEffect(() => {
+        getAllHobbyChoices()
+    }, []);
+
     useLayoutEffect(() => {
         if (firstUpdate.current) {
             firstUpdate.current = false;
@@ -49,6 +54,17 @@ const NotificationCenter = ({history}) => {
         setCheckingValidRecipients(true)
         checkValidRecipients()
     }, [hobby, gender, ageRange]);
+
+    const getAllHobbyChoices = () => {
+        axios({
+            method: "GET",
+            url: apiUrl + "get_hobby_choices",
+        })
+        .then(res => {
+            setAllHobbyChoices(res.data)
+        })
+        .catch(err => console.log(err))
+    }
 
     const onChangeRecipientRadio = (e) => {
         setRecipientOption(e.target.id)
@@ -90,11 +106,6 @@ const NotificationCenter = ({history}) => {
         })
     }
 
-    const onSendSingleRecipient = () => {
-        sendScheduleNotifsToServer([singleFCMToken])
-        setSendingProgress(100)
-    }
-
     const onSendFilterRecipients = async() => {
 
         if(validRecipientsNumber){
@@ -122,39 +133,22 @@ const NotificationCenter = ({history}) => {
         }
     }
 
-    const onSendAllRecipients = () => {
-        sendScheduleNotifsToServer([], "news")
-    }
-
-    const sendNotifsToServer = (tokens, topics) => {
-        axios.post("/fcm-sender", {
-            title: title,
-            body: body,
-            slug: slugData || "",
-            image: imageURL || "",
-            tokens: tokens.toString(),
-            topics: topics || "",
-        })
-            .then(res => console.log(res))
-            .catch(err => console.log(err))
-    }
-
     const sendScheduleNotifsToServer = (tokens, topics) => {
-        const scheduleData = { dateTime: scheduleDateTime, recurringExpression: scheduleRecurringExpression }
+        const notificationData = { title, body, slug: slugData, image: imageURL }
+        const scheduleData = { scheduleOption, scheduleDateTime, scheduleRecurringExpression }
+        const recipientData = { recipientOption, singleFCMToken, filterQuery }
+        console.log(JSON.stringify({ notificationData, scheduleData, recipientData }))
 
         axios.post("/fcm-schedule-sender", {
-            data : {
-                title: title,
-                body: body,
-                slug: slugData || "",
-                image: imageURL || "",
-                tokens: tokens.toString(),
-                topics: topics || "",
-                scheduleAction: scheduleOption,
-                scheduleData: scheduleData
-            }
+            notificationData: notificationData,
+            scheduleData: scheduleData,
+            recipientData: recipientData,
+            action: 'createPlan'
         })
-            .then(res => console.log(res))
+            .then(res => {
+                console.log(res.data)
+                setSendingProgress(0)
+            })
             .catch(err => console.log(err))
     }
 
@@ -173,18 +167,8 @@ const NotificationCenter = ({history}) => {
     }
 
     const onPressSendButton = () => {
-        if(recipientOption === 'singleRecipient') {
-            onSendSingleRecipient()
-        }
-
-        if(recipientOption === 'filterRecipients') {
-            onSendFilterRecipients()
-        }
-
-        if(recipientOption === 'allRecipients') {
-            onSendAllRecipients()
-            setSendingProgress(100)
-        }
+        setSendingProgress(100)
+        sendScheduleNotifsToServer()
     }
 
     const onNavigateScheduleHistory = () => {
@@ -241,7 +225,7 @@ const NotificationCenter = ({history}) => {
                 </Form>
             </div>
             <div
-                style={{ height: 350, width: 320, marginLeft: 20, borderStyle:"ridge" ,borderWidth: 1, borderRadius: 10, padding: 20, overflow: 'scroll' }}
+                style={{ height: 350, width: 320, marginHorizontal: 20, borderStyle:"ridge" ,borderWidth: 1, borderRadius: 10, padding: 20, overflow: 'scroll' }}
             >
                 <fieldset>
                   <Form.Group as={Row}>
@@ -275,7 +259,7 @@ const NotificationCenter = ({history}) => {
                 </fieldset>
 
                 {recipientOption === 'singleRecipient' &&
-                    <Form onSubmit={onSendSingleRecipient}>
+                    <Form>
                         <Form.Group as={Row} controlId="formFCMToken">
                           <Form.Label column sm={2}>
                             Token
@@ -299,10 +283,9 @@ const NotificationCenter = ({history}) => {
                           title="Lọc sở thích"
                           onSelect={e => setHobby(e)}
                         >
-                          <Dropdown.Item eventKey="Cà phê">Cà phê</Dropdown.Item>
-                          <Dropdown.Item eventKey="Nghe nhạc">Nghe nhạc</Dropdown.Item>
-                          <Dropdown.Item eventKey="Xem phim">Xem phim</Dropdown.Item>
-                          <Dropdown.Item eventKey="Đá bóng">Đá bóng</Dropdown.Item>
+                          {allHobbyChoices.map((item, index) => (
+                           <Dropdown.Item eventKey={item} key={index}>{item}</Dropdown.Item>
+                          ))}
                         </DropdownButton>
 
                         <DropdownButton
@@ -413,7 +396,7 @@ const NotificationCenter = ({history}) => {
                 >
                   <Modal.Header closeButton>
                     <Modal.Title id="example-custom-modal-styling-title">
-                      Recurring Builder Modal
+                      Recurring Builder
                     </Modal.Title>
                   </Modal.Header>
                   <Modal.Body>
